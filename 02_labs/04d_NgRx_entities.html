@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Angular Workshop by AngularArchitects.io</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs/styles/atom-one-light.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="copy.css" rel="stylesheet" />
+    <link href="styles.css" rel="stylesheet" />
+  </head>
+
+  <body class="ready">
+    <!-- <nav class="app-nav no-badge">
+    </nav> -->
+
+    <!-- placeholder:cover-page -->
+
+    <main>
+      <button class="sidebar-toggle" aria-label="Menu">
+        <div class="sidebar-toggle-button">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+      <aside class="sidebar">
+        <div class="sidebar-nav">
+          <p>&nbsp;</p>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="slides.html">Slides</a></li>
+            <li><a href="00_getting_started.html">Getting Started</a></li>
+            <li><a href="01a_libs_and_monorepo.html">Libraries and Monorepo</a></li>
+            <li><a href="01b_Nx_DDD.html">Using Nx Workspaces and DDD</a></li>
+            <li><a href="01c_module_federation.html">Module Federation</a></li>
+            <li><a href="03_RxJS.html">RxJs</a></li>
+            <li><a href="04a_NgRx_store.html">Manage State with NGRX</a></li>
+            <li><a href="04b_NgRx_selectors.html">NGRX Selectors</a></li>
+            <li><a href="04c_NgRx_effects.html">Side Effects with NGRX Effects</a></li>
+            <li><a href="04d_NgRx_entities.html">NGRX Entity</a></li>
+            <li><a href="05_performance.html">Angular Performance</a></li>
+            <li><a href="06_auth.html">OAuth 2 and OIDC</a></li>
+            <li><a href="07_I18N.html">i18n</a></li>
+            
+</ul>
+
+        </div>
+      </aside>
+
+      <section class="content">
+        <article class="markdown-section" id="main">
+          <h1 id="ngrx-entity">NGRX Entity</h1>
+<ul>
+<li><a href="#ngrx-entity">NGRX Entity</a>
+<ul>
+<li><a href="#managing-passengers">Managing Passengers</a></li>
+<li><a href="#bonus-loading-passengers-">Bonus: Loading passengers **</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="managing-passengers">Managing Passengers</h2>
+<p>In this exercise, you will leverage <code>@ngrx/entity</code> and <code>@ngrx/schematics</code> to manage <code>Passenger</code> entities with the store. For this, you will create an separate PassengerModule with a PassengerComponent.</p>
+<ol>
+<li>
+<p>Use the CLI to generate a new <code>PassengersModule</code> with the boilerplate for <code>@ngrx/entity</code>. For this, switch into the folder <code>flight-app\src\app</code> and use the following commands:</p>
+<pre><code>npx ng g module passengers
+cd passengers
+npx ng g @ngrx/schematics:entity Passenger --module passengers.module.ts --creators
+</code></pre>
+</li>
+<li>
+<p>Discover the generated files.</p>
+</li>
+<li>
+<p>Open the file <code>passenger.model</code> and add a <code>name</code> property to the <code>Passenger</code> class. Also, <strong>make the id a number</strong>:</p>
+<pre><code class="language-TypeScript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> Passenger {
+    id: <span class="hljs-built_in">number</span>;    <span class="hljs-comment">// &lt;-- Modify (number)</span>
+    name: <span class="hljs-built_in">string</span>;  <span class="hljs-comment">// &lt;-- Add this</span>
+}
+</code></pre>
+</li>
+<li>
+<p>In the <code>passengers</code> folder, create a new file <code>passenger.selectors.ts</code>:</p>
+<pre><code class="language-typescript"><span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> fromPassenger <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./passenger.reducer&#x27;</span>;
+<span class="hljs-keyword">import</span> { createSelector } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@ngrx/store&#x27;</span>;
+<span class="hljs-keyword">import</span> { passengersFeatureKey } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./passenger.reducer&#x27;</span>;
+
+<span class="hljs-comment">// Parent node pointing to passenger state</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> PassengerAppState {
+  [passengersFeatureKey]: fromPassenger.State;
+}
+
+<span class="hljs-comment">// Selector pointing to passenger state in store</span>
+<span class="hljs-keyword">const</span> base = <span class="hljs-function">(<span class="hljs-params">s: PassengerAppState</span>) =&gt;</span> s.passengers;
+
+<span class="hljs-comment">// Selector pointing to all passenger entities</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> selectAllPassengers = createSelector(base, fromPassenger.selectAll);
+</code></pre>
+</li>
+<li>
+<p>In the <code>passengers</code> folder, create a new <code>PassengersComponent</code>. In its <code>ngOnInit</code> method, send an <code>AddPassengers</code> action with an hard coded array of passengers to the store and query all the passengers using the above mentioned <code>selectAllPassengers</code> selector. Display the passengers in the template.</p>
+<details>
+<summary>Show code (TypeScript)</summary>
+<p>
+<pre><code class="language-TypeScript"><span class="hljs-meta">@Component</span>({
+    selector: <span class="hljs-string">&#x27;app-passengers&#x27;</span>,
+    templateUrl: <span class="hljs-string">&#x27;./passengers.component.html&#x27;</span>,
+    styleUrls: [<span class="hljs-string">&#x27;./passengers.component.css&#x27;</span>]
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> PassengersComponent <span class="hljs-keyword">implements</span> OnInit {
+
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> store: Store&lt;PassengerAppState&gt;</span>) {}
+
+    passengers$: Observable&lt;Passenger[]&gt;;
+
+    ngOnInit(): <span class="hljs-built_in">void</span> {
+        <span class="hljs-built_in">this</span>.store.dispatch(addPassengers({ passengers: [{id: <span class="hljs-number">1</span>, name: <span class="hljs-string">&#x27;Max&#x27;</span>}, {id:<span class="hljs-number">2</span>, name: <span class="hljs-string">&#x27;Susi&#x27;</span>}]}));
+        <span class="hljs-built_in">this</span>.passengers$ = <span class="hljs-built_in">this</span>.store.select(selectAllPassengers);
+    }
+
+}
+</code></pre>
+</p>
+</details>
+<details>
+<summary>Show code (HTML)</summary>
+<p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;card&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;header&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;title&quot;</span>&gt;</span>Latest Passengers<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;content&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">pre</span>&gt;</span>{{ passengers$ | async | json}}<span class="hljs-tag">&lt;/<span class="hljs-name">pre</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Make sure, the <code>PassengersComponent</code> is declared <strong>AND</strong> exported with the <code>PassengerModule</code>.</p>
+</li>
+<li>
+<p>Make sure, the <code>PassengersModule</code> is imported into the <code>AppModule</code>.</p>
+</li>
+<li>
+<p>Call the <code>PassengersComponent</code> within the <code>HomeComponent</code> to try it out.</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">app-passengers</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">app-passengers</span>&gt;</span>
+</code></pre>
+</li>
+<li>
+<p>Test your application.</p>
+</li>
+</ol>
+<h2 id="bonus-loading-passengers-">Bonus: Loading passengers **</h2>
+<p>Extend your solution to load passengers using a search form and an effect. You can use the following Web API for this:</p>
+<pre><code>http://angular.at/api/passenger?name=Muster
+</code></pre>
+<p>Please note that this Web API is using PascalCase to display attributes with XML but camelCase for JSON to respect the respective usual conventions.</p>
+
+        </article>
+      </section>
+    </main>
+
+    <script src="copy.js"></script>
+    <script src="toggle.js"></script>
+    <script src="copy-diff.js"></script>
+
+  </body>
+</html>

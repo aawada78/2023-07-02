@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Angular Workshop by AngularArchitects.io</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description" content="Description" />
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs/styles/atom-one-light.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link href="copy.css" rel="stylesheet" />
+  <link href="styles.css" rel="stylesheet" />
+</head>
+
+<body class="ready">
+  <!-- <nav class="app-nav no-badge">
+    </nav> -->
+
+  <!-- placeholder:cover-page -->
+
+  <main>
+    <button class="sidebar-toggle" aria-label="Menu">
+      <div class="sidebar-toggle-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </button>
+    <aside class="sidebar">
+      <div class="sidebar-nav">
+        <p>&nbsp;</p>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="slides.html">Slides</a></li>
+          <li><a href="00_getting_started.html">Getting Started</a></li>
+          <li><a href="01a_libs_and_monorepo.html">Libraries and Monorepo</a></li>
+          <li><a href="01b_Nx_DDD.html">Using Nx Workspaces and DDD</a></li>
+          <li><a href="01c_module_federation.html">Module Federation</a></li>
+          <li><a href="03_RxJS.html">RxJs</a></li>
+          <li><a href="04a_NgRx_store.html">Manage State with NGRX</a></li>
+          <li><a href="04b_NgRx_selectors.html">NGRX Selectors</a></li>
+          <li><a href="04c_NgRx_effects.html">Side Effects with NGRX Effects</a></li>
+          <li><a href="04d_NgRx_entities.html">NGRX Entity</a></li>
+          <li><a href="05_performance.html">Angular Performance</a></li>
+          <li><a href="06_auth.html">OAuth 2 and OIDC</a></li>
+          <li><a href="07_I18N.html">i18n</a></li>
+          
+        </ul>
+
+      </div>
+    </aside>
+
+    <section class="content">
+      <article class="markdown-section" id="main">
+        <h1 id="micro-frontends-with-webpack-module-federation-and-angular">Micro Frontends with Webpack Module
+          Federation and Angular</h1>
+        <p>This lab shows how to use Webpack Module Federation together with the Angular CLI and the
+          <code>@angular-architects/module-federation</code> plugin. The goal is to make a shell capable of
+          <strong>loading a separately compiled and deployed microfrontend</strong>.</p>
+        <ul>
+          <li><a href="#micro-frontends-with-webpack-module-federation-and-angular">Micro Frontends with Webpack Module
+              Federation and Angular</a>
+            <ul>
+              <li><a href="#activate-and-configure-module-federation">Activate and Configure Module Federation</a>
+                <ul>
+                  <li><a href="#flight-app-as-shell-and-passenger-micro-frontend">Flight-App as shell and Passenger
+                      Micro Frontend</a></li>
+                  <li><a href="#activate-and-configure-module-federation-1">Activate and configure Module Federation</a>
+                  </li>
+                </ul>
+              </li>
+              <li><a href="#try-it-out">Try it out</a></li>
+              <li><a href="#bonus-switch-to-dynamic-federation-">Bonus: Switch to Dynamic Federation *</a></li>
+              <li><a href="#bonus-share-a-library-of-your-monorepo-">Bonus: Share a Library of your Monorepo *</a></li>
+              <li><a href="#module-federation-and-web-components-multiple-versions-and-frameworks">Module Federation and
+                  Web Components (Multiple Versions and Frameworks)</a>
+                <ul>
+                  <li><a href="#inspect-the-web-component-based-micro-frontends">Inspect the Web-Component-based Micro
+                      Frontends</a></li>
+                </ul>
+              </li>
+              <li><a href="#bonus-more-details-on-module-federation-">Bonus: More Details on Module Federation **</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <h2 id="activate-and-configure-module-federation">Activate and Configure Module Federation</h2>
+        <h3 id="flight-app-as-shell-and-passenger-micro-frontend">Flight-App as shell and Passenger Micro Frontend</h3>
+        <p>In this part you will use the prepared workspace including the <code>passenger</code> app that is using
+          Domain-driven Design (DDD) patterns with separated libraries.</p>
+        <ol>
+          <li>Start the micro frontend <code>passenger</code> (<code>nx serve passenger -o</code>).</li>
+          <li>Search for passengers and navigate to the edit view.</li>
+          <li>Have a look to the micro frontend's source code including the used libraries.</li>
+          <li>Stop the CLI (<code>CTRL+C</code>).</li>
+        </ol>
+        <h3 id="activate-and-configure-module-federation-2">Activate and configure Module Federation</h3>
+        <p>Now, let's activate and configure module federation for the shell (<code>flight-app</code>):</p>
+        <ol>
+          <li>
+            <p>Install <code>@angular-architects/module-federation</code> into the passenger app:</p>
+            <pre><code>npm i @angular-architects/module-federation -D
+nx g @angular-architects/module-federation:init --project passenger --port 4201 --type remote
+</code></pre>
+            <p>This activates module federation, assigns a port for nx serve, and generates the skeleton of a module
+              federation configuration.</p>
+          </li>
+          <li>
+            <p>In the project <code>passenger</code>, open the generated configuration file
+              <code>apps/passenger/webpack.config.js</code>. Adjust it as follows:</p>
+            <pre><code class="language-javascript"><span class="hljs-keyword">const</span> { shareAll, withModuleFederationPlugin } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@angular-architects/module-federation/webpack&#x27;</span>);
+
+<span class="hljs-built_in">module</span>.exports = withModuleFederationPlugin({
+
+  <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;passenger&#x27;</span>,
+
+  <span class="hljs-attr">exposes</span>: {
+    <span class="hljs-comment">// Adjust this line:</span>
+    <span class="hljs-string">&#x27;./module&#x27;</span>: <span class="hljs-string">&#x27;./apps/passenger/src/app/passenger/passenger.module.ts&#x27;</span>,
+  },
+
+  <span class="hljs-attr">shared</span>: {
+    ...shareAll({ <span class="hljs-attr">singleton</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">strictVersion</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">requiredVersion</span>: <span class="hljs-string">&#x27;auto&#x27;</span> }),
+  },
+
+});
+</code></pre>
+            <p>This exposes the <code>PassengerModule</code> under the Name <code>./module</code>. Hence, the shell can
+              use this path to load it.</p>
+          </li>
+          <li>
+            <p>Also, install <code>@angular-architects/module-federation</code> into the <code>flight-app</code>:</p>
+            <pre><code>nx g @angular-architects/module-federation:init --project flight-app --port 4200 --type host
+</code></pre>
+          </li>
+          <li>
+            <p>In the <code>flight-app</code> project, open the file <code>apps/flight-app/webpack.config.js</code>.
+              Adjust it as follows:</p>
+            <pre><code class="language-javascript"><span class="hljs-keyword">const</span> { shareAll, withModuleFederationPlugin } = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;@angular-architects/module-federation/webpack&#x27;</span>);
+
+<span class="hljs-built_in">module</span>.exports = withModuleFederationPlugin({
+
+  <span class="hljs-attr">remotes</span>: {
+    <span class="hljs-string">&quot;passenger&quot;</span>: <span class="hljs-string">&quot;http://localhost:4201/remoteEntry.js&quot;</span>,    
+  },
+
+  <span class="hljs-attr">shared</span>: {
+    ...shareAll({ <span class="hljs-attr">singleton</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">strictVersion</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">requiredVersion</span>: <span class="hljs-string">&#x27;auto&#x27;</span> }),
+  },
+
+});
+</code></pre>
+            <p>This references the separately compiled and deployed <code>passenger</code> project. There are some
+              alternatives to configure its URL (see link at the end).</p>
+          </li>
+          <li>
+            <p>Open the <code>flight-app</code>'s router config (<code>apps/flight-app/src/app/app.routes.ts</code>) and
+              add a route loading the micro frontend:</p>
+            <pre><code class="language-javascript"><span class="hljs-comment">// Add this route:</span>
+{
+    <span class="hljs-attr">path</span>: <span class="hljs-string">&#x27;mf-passenger&#x27;</span>,
+    <span class="hljs-attr">loadChildren</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;passenger/module&#x27;</span>)
+        .then(<span class="hljs-function"><span class="hljs-params">esm</span> =&gt;</span> esm.PassengerModule)
+},
+
+<span class="hljs-comment">// This route ALWAYS needs to be the last one:</span>
+{
+    <span class="hljs-attr">path</span>: <span class="hljs-string">&#x27;**&#x27;</span>,
+    <span class="hljs-attr">redirectTo</span>: <span class="hljs-string">&#x27;home&#x27;</span>
+}
+</code></pre>
+            <p>Please note that the imported URL consists of the names defined in the configuration files above. Also,
+              for this URL, TypeScript will report an error, as this (virtual) URL does not correlates with a file. The
+              <strong>next step</strong> will take care of this.</p>
+          </li>
+          <li>
+            <p>As the Url <code>passenger/module</code> does not exist at compile time, ease the TypeScript compiler by
+              adding a typing. For this, create a file <code>apps/flight-app/src/mf.d.ts</code> with the following
+              declaration:</p>
+            <pre><code class="language-javascript">declare <span class="hljs-built_in">module</span> <span class="hljs-string">&#x27;passenger/module&#x27;</span> {
+    <span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> PassengerModule: any;
+};
+</code></pre>
+          </li>
+          <li>
+            <p>Now, you also need to create a menu item for the newly introduced route. For this, open you
+              <code>flight-app</code>'s <code>sidebar.component.html</code> and add the following entry:</p>
+            <pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">routerLinkActive</span>=<span class="hljs-string">&quot;active&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">routerLink</span>=<span class="hljs-string">&quot;mf-passenger&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">i</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;ti-user&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">i</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>MF Passenger<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+</code></pre>
+          </li>
+        </ol>
+        <h2 id="try-it-out">Try it out</h2>
+        <p>Now, let's try it out!</p>
+        <ol>
+          <li>
+            <p>Start the <code>flight-app</code> and <code>passenger</code> micro frontend side by side in two different
+              windows:</p>
+            <pre><code>nx serve flight-app -o
+nx serve passenger -o
+</code></pre>
+            <p><strong>Hint:</strong> You might use two terminals for this.</p>
+          </li>
+          <li>
+            <p>After a browser window with the shell opened (<code>http://localhost:4200</code>), click on the
+              <code>MF Passenger</code> link in the sidebar. This should load the micro frontend into the
+              <code>flight-app</code> shell.</p>
+          </li>
+          <li>
+            <p>Ensure yourself that the micro frontend runs in standalone mode at <code>http://localhost:4201</code>
+              too.</p>
+          </li>
+        </ol>
+        <p>Congratulations! You've implemented your first Module Federation project with Angular!</p>
+        <h2 id="bonus-switch-to-dynamic-federation-">Bonus: Switch to Dynamic Federation *</h2>
+        <p>Now, let's remove the need for registering the micro frontends upfront with shell.</p>
+        <ol>
+          <li>
+            <p>Switch to your <code>flight-app</code> shell and open the file <code>webpack.config.js</code>. Here,
+              remove the registered remotes:</p>
+            <pre><code class="language-javascript">remotes: {
+    <span class="hljs-comment">// Remove this line or comment it out:</span>
+    <span class="hljs-comment">// &#x27;passenger&#x27;: &quot;passenger@http://localhost:4201/remoteEntry.js&quot;,</span>
+},
+</code></pre>
+          </li>
+          <li>
+            <p>Create a file <code>mf-types.ts</code> within <code>apps\flight-app\src</code>. Add the following
+              interface:</p>
+            <pre><code class="language-typescript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> PassengerMf {
+  PassengerModule: <span class="hljs-built_in">any</span>;
+}
+</code></pre>
+            <p>Note: This interface replaces the typing introduced in the previous section.</p>
+          </li>
+          <li>
+            <p>Open the file <code>app.routes.ts</code> and use the function <code>loadRemoteModule</code> instead of
+              the dynamic <code>import()</code> statement:</p>
+            <pre><code class="language-typescript"><span class="hljs-comment">// Add this import:</span>
+<span class="hljs-keyword">import</span> { loadRemoteModule } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular-architects/module-federation&#x27;</span>;
+
+[...]
+<span class="hljs-keyword">const</span> routes: Routes = [
+    [...]
+    <span class="hljs-comment">// Update this route:</span>
+    {
+        path: <span class="hljs-string">&#x27;mf-passenger&#x27;</span>,
+        loadChildren: <span class="hljs-function">() =&gt;</span>
+            loadRemoteModule&lt;PassengerMf&gt;({
+                <span class="hljs-keyword">type</span>: <span class="hljs-string">&#x27;module&#x27;</span>,
+                remoteEntry: <span class="hljs-string">&#x27;http://localhost:4201/remoteEntry.js&#x27;</span>,
+                exposedModule: <span class="hljs-string">&#x27;./module&#x27;</span>
+            })
+            .then(<span class="hljs-function"><span class="hljs-params">esm</span> =&gt;</span> esm.PassengerModule)
+    },
+    [...]
+    <span class="hljs-comment">// This route ALWAYS needs to be the last one:</span>
+    {
+        path: <span class="hljs-string">&#x27;**&#x27;</span>,
+        redirectTo: <span class="hljs-string">&#x27;home&#x27;</span>
+    }
+]
+</code></pre>
+          </li>
+          <li>
+            <p>Restart both, the <code>flight-app</code> shell and the <code>passenger</code> micro frontend.</p>
+          </li>
+          <li>
+            <p>The shell should still be able to load the micro frontend. However, now it's loaded dynamically.</p>
+          </li>
+        </ol>
+        <p>This was quite easy, wasn't it? However, we can improve this solution a bit. Ideally, we load the remote
+          entry upfront before Angular bootstraps. In this early phase, Module Federation tries to determine the highest
+          compatible versions of all dependencies. Let's assume, the shell provides version <code>1.0.0</code> of a
+          dependency (specifying <code>^1.0.0</code> in its <code>package.json</code>) and the micro frontend uses
+          version <code>1.1.0</code> (specifying <code>^1.1.0</code> in its <code>package.json</code>). In this case,
+          they would go with version <code>1.1.0</code>. However, this is only possible if the remote's entry is loaded
+          upfront.</p>
+        <ol start="6">
+          <li>
+            <p>Switch to the <code>flight-app</code> project and open the file <code>main.ts</code>. Adjust it as
+              follows:</p>
+            <pre><code class="language-typescript"><span class="hljs-keyword">import</span> { loadRemoteEntry } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular-architects/module-federation&#x27;</span>;
+
+<span class="hljs-built_in">Promise</span>.all([loadRemoteEntry({ <span class="hljs-keyword">type</span>: <span class="hljs-string">&#x27;module&#x27;</span>, remoteEntry: <span class="hljs-string">&#x27;http://localhost:4201/remoteEntry.js&#x27;</span> })])
+  .catch(<span class="hljs-function">(<span class="hljs-params">err</span>) =&gt;</span> <span class="hljs-built_in">console</span>.error(<span class="hljs-string">&#x27;Error loading remote entries&#x27;</span>, err))
+  .then(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">&#x27;./bootstrap&#x27;</span>))
+  .catch(<span class="hljs-function">(<span class="hljs-params">err</span>) =&gt;</span> <span class="hljs-built_in">console</span>.error(err));
+</code></pre>
+          </li>
+          <li>
+            <p>Restart both, the <code>flight-app</code> shell and the <code>passenger</code> micro frontend.</p>
+          </li>
+          <li>
+            <p>The shell should still be able to load the micro frontend.</p>
+          </li>
+        </ol>
+        <h2 id="bonus-share-a-library-of-your-monorepo-">Bonus: Share a Library of your Monorepo *</h2>
+        <ol>
+          <li>
+            <p>Add a library to your monorepo:</p>
+            <pre><code>nx g lib auth-lib --buildable --directory shared
+</code></pre>
+          </li>
+          <li>
+            <p>As our monorepo uses linting rules to restrict the access between different types of libraries, we need
+              to define some tags for our new library. For this, open the project's <code>project.json</code> in the
+              monorepo's root and add the following tags to the entry for <code>shared-auth-lib</code>:</p>
+            <pre><code class="language-json">&quot;tags&quot;: [&quot;domain:shared&quot;, &quot;type:util&quot;]
+</code></pre>
+          </li>
+          <li>
+            <p>As most IDEs only read global configuration files like the <code>tsconfig.base.json</code> once, restart
+              your IDE (alternatively, your IDE might also provide an option for reloading these settings, e. g. by
+              restarting the TypeScript Language Server).</p>
+          </li>
+          <li>
+            <p>Switch to your <code>auth-lib</code> project. In it's folder <code>auth-lib\src\lib</code>, create a file
+              <code>auth-lib.service.ts</code> with the following service:</p>
+            <pre><code class="language-typescript"><span class="hljs-keyword">import</span> { Injectable } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular/core&#x27;</span>;
+
+<span class="hljs-meta">@Injectable</span>({
+  providedIn: <span class="hljs-string">&#x27;root&#x27;</span>,
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AuthLibService {
+  <span class="hljs-keyword">private</span> userName: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+
+  <span class="hljs-keyword">public</span> get user(): <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">this</span>.userName;
+  }
+
+  <span class="hljs-keyword">public</span> login(userName: <span class="hljs-built_in">string</span>, password: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">void</span> {
+    <span class="hljs-comment">// Authentication for **honest** users TM. (c) Manfred Steyer</span>
+    <span class="hljs-built_in">this</span>.userName = userName;
+  }
+}
+</code></pre>
+          </li>
+          <li>
+            <p>Switch to the <code>index.ts</code> of your <code>auth-lib</code> and make sure that the
+              <code>AuthLibService</code> is exported:</p>
+            <pre><code class="language-typescript"><span class="hljs-keyword">export</span> * <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./lib/shared-auth-lib.module&#x27;</span>;
+<span class="hljs-comment">// Add this:</span>
+<span class="hljs-keyword">export</span> { AuthLibService } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./lib/auth-lib.service&#x27;</span>;
+</code></pre>
+          </li>
+          <li>
+            <p>Switch to your <code>flight-app</code> project and open its <code>app.component.ts</code>. Use the shared
+              <code>AuthLibService</code> to login a user:</p>
+            <pre><code class="language-typescript"><span class="hljs-comment">// Perhaps you need to add this manually:</span>
+<span class="hljs-keyword">import</span> { AuthLibService } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@flight-workspace/shared/auth-lib&#x27;</span>;
+
+<span class="hljs-meta">@Component</span>({
+  selector: <span class="hljs-string">&#x27;flight-app&#x27;</span>,
+  templateUrl: <span class="hljs-string">&#x27;./app.component.html&#x27;</span>,
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AppComponent {
+  title = <span class="hljs-string">&#x27;shell&#x27;</span>;
+
+  <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> authService: AuthLibService</span>) {
+    <span class="hljs-built_in">this</span>.authService.login(<span class="hljs-string">&#x27;Max&#x27;</span>, <span class="hljs-string">&#x27;&#x27;</span>);
+  }
+}
+</code></pre>
+          </li>
+          <li>
+            <p>Switch to your <code>passenger-feature-search</code> library and open its
+              <code>search.component.ts</code>. Use the shared service to retrieve the current user's name:</p>
+            <pre><code class="language-typescript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> SearchComponent {
+
+    [...]
+
+    user = <span class="hljs-built_in">this</span>.authService.user;
+
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> authService: AuthLibService, [...]</span>) {}
+
+    [...]
+}
+</code></pre>
+          </li>
+          <li>
+            <p>Open this component's template (<code>search.component.html</code>) and data bind the property
+              <code>user</code>:</p>
+            <pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;content&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>User: {{user}}<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+  [...]
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</code></pre>
+          </li>
+          <li>
+            <p>Restart both, the <code>flight-app</code> and the micro frontend (<code>passenger</code>).</p>
+          </li>
+          <li>
+            <p>In the shell, navigate to the micro frontend. If it shows the same user name, the library is shared.</p>
+          </li>
+        </ol>
+        <h2 id="module-federation-and-web-components-multiple-versions-and-frameworks">Module Federation and Web
+          Components (Multiple Versions and Frameworks)</h2>
+        <p>In this section, we load web components via module federation. This allows us, to mix different frameworks
+          and versions.</p>
+        <ol>
+          <li>
+            <p>Install the tooling library <code>@angular-architects/module-federation-tools</code>:</p>
+            <pre><code>npm i @angular-architects/module-federation-tools --force
+</code></pre>
+          </li>
+          <li>
+            <p>Restart your IDE</p>
+          </li>
+          <li>
+            <p>In your <code>flight-app</code>, open the file <code>app.routes.ts</code> and add the following routes
+              pointing to existing web components:</p>
+            <pre><code class="language-typescript">[...]
+<span class="hljs-keyword">import</span> { startsWith, WebComponentWrapper, WebComponentWrapperOptions } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular-architects/module-federation-tools&#x27;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> APP_ROUTES: Routes = [
+
+    [...]
+
+    <span class="hljs-comment">// Add this route:</span>
+    {
+        path: <span class="hljs-string">&#x27;angular2&#x27;</span>,
+        component: WebComponentWrapper,
+        data: {
+            remoteEntry: <span class="hljs-string">&#x27;https://gray-pond-030798810.azurestaticapps.net//remoteEntry.js&#x27;</span>,
+            remoteName: <span class="hljs-string">&#x27;angular2&#x27;</span>,
+            exposedModule: <span class="hljs-string">&#x27;./web-components&#x27;</span>,
+            elementName: <span class="hljs-string">&#x27;angular2-element&#x27;</span>
+        } <span class="hljs-keyword">as</span> WebComponentWrapperOptions
+    },
+
+    <span class="hljs-comment">// And this route too:</span>
+    {
+        path: <span class="hljs-string">&#x27;react&#x27;</span>,
+        component: WebComponentWrapper,
+        data: {
+            remoteEntry: <span class="hljs-string">&#x27;https://witty-wave-0a695f710.azurestaticapps.net/remoteEntry.js&#x27;</span>,
+            remoteName: <span class="hljs-string">&#x27;react&#x27;</span>,
+            exposedModule: <span class="hljs-string">&#x27;./web-components&#x27;</span>,
+            elementName: <span class="hljs-string">&#x27;react-element&#x27;</span>
+        } <span class="hljs-keyword">as</span> WebComponentWrapperOptions
+    },
+
+    <span class="hljs-comment">// And also this route:</span>
+    {
+        matcher: startsWith(<span class="hljs-string">&#x27;angular3&#x27;</span>),
+        component: WebComponentWrapper,
+        data: {
+            remoteEntry: <span class="hljs-string">&#x27;https://gray-river-0b8c23a10.azurestaticapps.net/remoteEntry.js&#x27;</span>,
+            remoteName: <span class="hljs-string">&#x27;angular3&#x27;</span>,
+            exposedModule: <span class="hljs-string">&#x27;./web-components&#x27;</span>,
+            elementName: <span class="hljs-string">&#x27;angular3-element&#x27;</span>
+        } <span class="hljs-keyword">as</span> WebComponentWrapperOptions
+    },
+
+    <span class="hljs-comment">// This route ALWAYS needs to be the last one:</span>
+    {
+        path: <span class="hljs-string">&#x27;**&#x27;</span>,
+        redirectTo: <span class="hljs-string">&#x27;home&#x27;</span>
+    }
+];
+</code></pre>
+            <p>As the Angular Router does not allow directly routing to web components, here we use a wrapper component
+              <code>WebComponentWrapper</code>.</p>
+          </li>
+          <li>
+            <p>Switch to your <code>flight-app</code>'s <code>sidebar.component.html</code> and add menu items for your
+              new routes:</p>
+            <pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">routerLinkActive</span>=<span class="hljs-string">&quot;active&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">routerLink</span>=<span class="hljs-string">&quot;react&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">i</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;ti-user&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">i</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>MF React<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">routerLinkActive</span>=<span class="hljs-string">&quot;active&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">routerLink</span>=<span class="hljs-string">&quot;angular2&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">i</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;ti-user&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">i</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>MF Angular #2<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">routerLinkActive</span>=<span class="hljs-string">&quot;active&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">routerLink</span>=<span class="hljs-string">&quot;angular3/a&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">i</span> <span class="hljs-attr">class</span>=<span class="hljs-string">&quot;ti-user&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">i</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>MF Angular #3<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+</code></pre>
+          </li>
+          <li>
+            <p>Now, let's make sure that sharing packages and zone.js with web components works seamlessly. Switch to
+              your <code>flight-app</code>'s <code>bootstrap.ts</code> and adjust it as follows:</p>
+            <pre><code class="language-typescript"><span class="hljs-keyword">import</span> { bootstrap } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular-architects/module-federation-tools&#x27;</span>;
+<span class="hljs-keyword">import</span> { AppModule } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./app/app.module&#x27;</span>;
+<span class="hljs-keyword">import</span> { environment } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./environments/environment&#x27;</span>;
+
+bootstrap(AppModule, {
+  production: environment.production,
+  appType: <span class="hljs-string">&#x27;shell&#x27;</span>
+});
+</code></pre>
+            <p><strong>Remarks:</strong> This new <code>boostrap</code> method makes sure we can bootstrap several
+              separately compiled applications in the same browser tab.</p>
+          </li>
+          <li>
+            <p>Start your application and assure yourself that the web components are loaded. You should also see some
+              other details:</p>
+            <ul>
+              <li>
+                <p>MF Angular #2 and #3 should share the same Angular instance. If they share the Angular version with
+                  the shell, no additional bundle set with Angular are loaded. Otherwise, only one additional bundle set
+                  is loaded and shared across them. You can inspect this using your browser's debug tools (network tab).
+                  This is because we combine Web Components with Module Federation.</p>
+              </li>
+              <li>
+                <p>MF Angular #3 uses routing and introduces sub routes</p>
+              </li>
+            </ul>
+          </li>
+        </ol>
+        <h3 id="inspect-the-web-component-based-micro-frontends">Inspect the Web-Component-based Micro Frontends</h3>
+        <p>In this part of the lab, we will investigate the loaded micro frontend that has been called <a
+            href="https://github.com/manfredsteyer/angular3-app">&quot;MF Angular #3&quot;</a> before. We want to draw
+          your attention to the following details:</p>
+        <ol>
+          <li>
+            <p>The application is bootstrapped with the <a
+                href="https://github.com/manfredsteyer/angular3-app/blob/main/src/bootstrap.ts">bootstrap function</a>
+              already used above.</p>
+          </li>
+          <li>
+            <p>The <code>AppModule</code> is wrapping some components as web components using Angular Elements in it's
+              <a href="https://github.com/manfredsteyer/angular3-app/blob/main/src/app/app.module.ts">ngDoBootstrap</a>
+              method.</p>
+          </li>
+          <li>
+            <p>The <a href="https://github.com/manfredsteyer/angular3-app/blob/main/webpack.config.js">webpack
+                config</a> exposes the whole <code>bootstrap.ts</code> file. Hence, everyone importing it can use the
+              provided web components.</p>
+          </li>
+          <li>
+            <p>The <a href="https://github.com/manfredsteyer/angular3-app/blob/main/webpack.config.js">webpack
+                config</a> shares libraries like <code>@angular/core</code>.</p>
+          </li>
+        </ol>
+        <h2 id="bonus-more-details-on-module-federation-">Bonus: More Details on Module Federation **</h2>
+        <p>If you would like to know more about Module Federation with Angular take a look at this <a
+            href="https://www.angulararchitects.io/aktuelles/the-microfrontend-revolution-part-2-module-federation-with-angular/">article
+            series about Module Federation</a>.</p>
+
+      </article>
+    </section>
+  </main>
+
+  <script src="copy.js"></script>
+  <script src="toggle.js"></script>
+  <script src="copy-diff.js"></script>
+
+</body>
+
+</html>

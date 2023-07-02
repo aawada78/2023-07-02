@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Angular Workshop by AngularArchitects.io</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs/styles/atom-one-light.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="copy.css" rel="stylesheet" />
+    <link href="styles.css" rel="stylesheet" />
+  </head>
+
+  <body class="ready">
+    <!-- <nav class="app-nav no-badge">
+    </nav> -->
+
+    <!-- placeholder:cover-page -->
+
+    <main>
+      <button class="sidebar-toggle" aria-label="Menu">
+        <div class="sidebar-toggle-button">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+      <aside class="sidebar">
+        <div class="sidebar-nav">
+          <p>&nbsp;</p>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="slides.html">Slides</a></li>
+            <li><a href="00_getting_started.html">Getting Started</a></li>
+            <li><a href="01a_libs_and_monorepo.html">Libraries and Monorepo</a></li>
+            <li><a href="01b_Nx_DDD.html">Using Nx Workspaces and DDD</a></li>
+            <li><a href="01c_module_federation.html">Module Federation</a></li>
+            <li><a href="03_RxJS.html">RxJs</a></li>
+            <li><a href="04a_NgRx_store.html">Manage State with NGRX</a></li>
+            <li><a href="04b_NgRx_selectors.html">NGRX Selectors</a></li>
+            <li><a href="04c_NgRx_effects.html">Side Effects with NGRX Effects</a></li>
+            <li><a href="04d_NgRx_entities.html">NGRX Entity</a></li>
+            <li><a href="05_performance.html">Angular Performance</a></li>
+            <li><a href="06_auth.html">OAuth 2 and OIDC</a></li>
+            <li><a href="07_I18N.html">i18n</a></li>
+            
+</ul>
+
+        </div>
+      </aside>
+
+      <section class="content">
+        <article class="markdown-section" id="main">
+          <h1 id="side-effects-with-ngrx-effects">Side Effects with NGRX Effects</h1>
+<ul>
+<li><a href="#side-effects-with-ngrx-effects">Side Effects with NGRX Effects</a>
+<ul>
+<li><a href="#creating-an-effect">Creating an Effect</a></li>
+<li><a href="#bonus-error-handling">Bonus: Error Handling</a></li>
+</ul>
+</li>
+</ul>
+<p>In this exercise you will create an effect for loading flights.</p>
+<h2 id="creating-an-effect">Creating an Effect</h2>
+<ol>
+<li>
+<p>Open your <code>flight-booking.actions.ts</code> file and add a <code>loadFlights</code> action creator:</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-TypeScript">[...]
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> loadFlights = createAction(
+    <span class="hljs-string">&#x27;[FlightBooking] LoadFlights&#x27;</span>,
+    props&lt;{<span class="hljs-keyword">from</span>: <span class="hljs-built_in">string</span>, to: <span class="hljs-built_in">string</span>, urgent: <span class="hljs-built_in">boolean</span>}&gt;()
+);
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Open the file <code>flight-booking.effects.ts</code> and add an effect that takes a <code>FlightsLoadAction</code>, loads the requested flights and returns a <code>FlightsLoadedAction</code>.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-TypeScript"><span class="hljs-meta">@Injectable</span>()
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> FlightBookingEffects {
+
+    loadFlights$ = createEffect(<span class="hljs-function">() =&gt;</span>
+        <span class="hljs-built_in">this</span>.actions$.pipe(
+            ofType(loadFlights),
+            switchMap(<span class="hljs-function"><span class="hljs-params">a</span> =&gt;</span> <span class="hljs-built_in">this</span>.flightService.find(a.from, a.to, a.urgent)),
+            map(<span class="hljs-function"><span class="hljs-params">flights</span> =&gt;</span> flightsLoaded({ flights }))
+        )
+    );
+
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> actions$: Actions, <span class="hljs-keyword">private</span> flightService: FlightService</span>) {}
+}
+</code></pre>
+</p>
+</details>
+<p><strong>Tipp:</strong> Import the <code>Actions</code> type from the module <code>@ngrx/effects</code>:</p>
+<p><code>import {Actions} from '@ngrx/effects';</code></p>
+</li>
+<li>
+<p>Open the file <code>flight-search.component.ts</code>. Change the <code>search</code> method so that it just dispatches a <code>loadFlights</code> action.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-TypeScript">search(): <span class="hljs-built_in">void</span> {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">this</span>.from || !<span class="hljs-built_in">this</span>.to) <span class="hljs-keyword">return</span>;
+
+  <span class="hljs-comment">// New:</span>
+  <span class="hljs-built_in">this</span>.store.dispatch(loadFlights({
+      <span class="hljs-keyword">from</span>: <span class="hljs-built_in">this</span>.from,
+      to: <span class="hljs-built_in">this</span>.to,
+      urgent: <span class="hljs-built_in">this</span>.urgent
+    }));
+
+  <span class="hljs-comment">// Old:</span>
+  <span class="hljs-comment">/*
+  this.flightService
+      .find(this.from, this.to, this.urgent)
+      .subscribe(
+        flights =&gt; {
+          this.store.dispatch(new flightsLoaded({flights}));
+        },
+        error =&gt; {
+          console.error(&#x27;error&#x27;, error);
+        }
+      );
+  */</span>
+}
+
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Test the application.</p>
+</li>
+<li>
+<p>Use the <code>Redux DevTools</code> Chrome plugin to find out which actions are dispatched.</p>
+</li>
+</ol>
+<h2 id="bonus-error-handling">Bonus: Error Handling</h2>
+<ol>
+<li>Open your <code>flight-booking.actions.ts</code> file and add an LoadFlightsError Action without a payload:</li>
+</ol>
+<pre><code class="language-typescript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> loadFlightsError = createAction(<span class="hljs-string">&#x27;[FlightBooking] Load Flights Error&#x27;</span>);
+</code></pre>
+<ol start="2">
+<li>
+<p>In your <code>flight-booking.effects.ts</code>, add an error handler to the switchMap. This error handler should return the <code>loadFlightError</code> action.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-typescript">loadFlightBookings$ = createEffect(<span class="hljs-function">() =&gt;</span>
+    <span class="hljs-built_in">this</span>.actions$.pipe(
+      ofType(loadFlights),
+      switchMap(<span class="hljs-function">(<span class="hljs-params">a</span>) =&gt;</span>
+        <span class="hljs-built_in">this</span>.flightService.find(a.from, a.to, a.urgent).pipe(
+          map(<span class="hljs-function">(<span class="hljs-params">flights</span>) =&gt;</span> flightsLoaded({ flights })),
+          catchError(<span class="hljs-function">(<span class="hljs-params">err</span>) =&gt;</span> <span class="hljs-keyword">of</span>(loadFlightsError()))
+        )
+      )
+    )
+);
+</code></pre>
+</p>  
+</details>
+</li>
+<li>
+<p>Test your solution. You can simulate an error with the Browser's dev tools by activating offline module in the <code>Network</code> tab.</p>
+</li>
+<li>
+<p>Use the Redux Dev Tools to make sure, that the <code>loadFlightsError</code> action is send to the store.</p>
+</li>
+</ol>
+
+        </article>
+      </section>
+    </main>
+
+    <script src="copy.js"></script>
+    <script src="toggle.js"></script>
+    <script src="copy-diff.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Angular Workshop by AngularArchitects.io</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="Description" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs/styles/atom-one-light.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="copy.css" rel="stylesheet" />
+    <link href="styles.css" rel="stylesheet" />
+  </head>
+
+  <body class="ready">
+    <!-- <nav class="app-nav no-badge">
+    </nav> -->
+
+    <!-- placeholder:cover-page -->
+
+    <main>
+      <button class="sidebar-toggle" aria-label="Menu">
+        <div class="sidebar-toggle-button">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+      <aside class="sidebar">
+        <div class="sidebar-nav">
+          <p>&nbsp;</p>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="slides.html">Slides</a></li>
+            <li><a href="00_getting_started.html">Getting Started</a></li>
+            <li><a href="01a_libs_and_monorepo.html">Libraries and Monorepo</a></li>
+            <li><a href="01b_Nx_DDD.html">Using Nx Workspaces and DDD</a></li>
+            <li><a href="01c_module_federation.html">Module Federation</a></li>
+            <li><a href="03_RxJS.html">RxJs</a></li>
+            <li><a href="04a_NgRx_store.html">Manage State with NGRX</a></li>
+            <li><a href="04b_NgRx_selectors.html">NGRX Selectors</a></li>
+            <li><a href="04c_NgRx_effects.html">Side Effects with NGRX Effects</a></li>
+            <li><a href="04d_NgRx_entities.html">NGRX Entity</a></li>
+            <li><a href="05_performance.html">Angular Performance</a></li>
+            <li><a href="06_auth.html">OAuth 2 and OIDC</a></li>
+            <li><a href="07_I18N.html">i18n</a></li>
+            
+</ul>
+
+        </div>
+      </aside>
+
+      <section class="content">
+        <article class="markdown-section" id="main">
+          <h1 id="i18n-with-ngx-translate">I18N with ngx-translate</h1>
+<ul>
+<li><a href="#i18n-with-ngx-translate">I18N with ngx-translate</a>
+<ul>
+<li><a href="#ngx-translate">ngx-translate</a></li>
+<li><a href="#bonus-use-different-date-formats-">Bonus: Use different date formats *</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="ngx-translate">ngx-translate</h2>
+<ol>
+<li>
+<p>Take a look at the file <code>package.json</code> and notice that the packages <code>@ngx-translate/core</code> and <code>@ngx-translate/http-loader</code> are already installed.</p>
+</li>
+<li>
+<p>Include the <code>TranslateModule</code> into your <code>AppModule</code> and configure the <code>TranslateHttpLoader</code> as the loader for translation texts.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-typescript">
+<span class="hljs-keyword">import</span> {TranslateModule, TranslateLoader} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@ngx-translate/core&#x27;</span>;
+<span class="hljs-keyword">import</span> {TranslateHttpLoader} <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@ngx-translate/http-loader&#x27;</span>;
+
+[…]
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">HttpLoaderFactory</span>(<span class="hljs-params">http: HttpClient</span>) </span>{
+<span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> TranslateHttpLoader(http, <span class="hljs-string">&quot;/assets/i18n/&quot;</span>, <span class="hljs-string">&quot;.json&quot;</span>);
+}
+
+[…]
+
+<span class="hljs-meta">@NgModule</span>({
+imports: [
+    BrowserModule,
+    FormsModule,
+    HttpModule,
+    [...]
+    TranslateModule.forRoot({
+        loader: {
+            provide: TranslateLoader,
+            useFactory: HttpLoaderFactory,
+            deps: [HttpClient]
+        }
+    })
+],
+[...]
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AppModule {}
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Include the <code>TranslateModule</code> into the <code>FlightBookingModule</code>.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-typescript">
+<span class="hljs-meta">@NgModule</span>({
+    imports: [
+        CommonModule,
+        FormsModule,
+        [...]
+        TranslateModule.forChild()
+    ],
+    [...]
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> FlightBookingModule {}
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Provide translation files for selected texts of the <code>FlightSearchComponent</code>. Name the files <code>de.json</code> and <code>en.json</code>.
+Of course you can also use other languages. However, it is important that you place the files in the folder <code>src/assets/i18n</code>.</p>
+ <details>
+ <summary>Show code</summary>
+ <p>
+<pre><code class="language-json">{
+  <span class="hljs-attr">&quot;FLIGHTS&quot;</span>: {
+    <span class="hljs-attr">&quot;search&quot;</span>: <span class="hljs-string">&quot;Search&quot;</span>,
+    <span class="hljs-attr">&quot;found&quot;</span>: <span class="hljs-string">&quot;{{count}} Entries found.&quot;</span>
+  }
+}
+</code></pre>
+ </p>
+ </details>
+</li>
+<li>
+<p>Let the <code>AppComponent</code> inject the <code>TranslateService</code> and configure it.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-typescript"><span class="hljs-built_in">this</span>.translate.addLangs([<span class="hljs-string">&#x27;en&#x27;</span>, <span class="hljs-string">&#x27;de&#x27;</span>]);
+<span class="hljs-built_in">this</span>.translate.setDefaultLang(<span class="hljs-string">&#x27;de&#x27;</span>);
+<span class="hljs-built_in">this</span>.translate.use(<span class="hljs-string">&#x27;de&#x27;</span>);
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Following the example of the solution shown, use the <code>translate</code> pipe to load the translation texts in the <code>FlightSearchComponent</code>.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-json">[...]
+{{ &#x27;FLIGHTS.search&#x27; | translate}}
+[...]
+{{ &#x27;FLIGHTS.found&#x27; | translate: { count: flights.length } }}
+[...]
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Let the <code>NavbarComponent</code> inject the <code>TranslateService</code>. Also implement a method for changing the language.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-typescript">
+<span class="hljs-meta">@Component</span>({ [...] })
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> NavbarComponent {
+
+    <span class="hljs-keyword">constructor</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> translate: TranslateService</span>) {}
+
+    setLang(lang: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">void</span> {
+        <span class="hljs-built_in">this</span>.translate.use(lang);
+    }
+
+    [...]
+}
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>In the <code>NavbarComponent</code> template, create links to change the language using the method introduced in the last paragraph.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> (<span class="hljs-attr">click</span>)=<span class="hljs-string">&quot;setLang(&#x27;en&#x27;)&quot;</span>&gt;</span>EN<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">li</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">a</span> (<span class="hljs-attr">click</span>)=<span class="hljs-string">&quot;setLang(&#x27;de&#x27;)&quot;</span>&gt;</span>DE<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+</code></pre>
+</p>
+</details>
+</li>
+<li>
+<p>Test your solution.</p>
+</li>
+</ol>
+<h2 id="bonus-use-different-date-formats-">Bonus: Use different date formats *</h2>
+<p>In this exercise you will load different formats for dates and numbers. Using these, you will change the way the <code>flight-card</code> displays the flight dates.</p>
+<ol>
+<li>
+<p>Open the file <code>app.module.ts</code> and register some locales.</p>
+<details>
+<summary>Show code</summary>
+<p>
+<pre><code class="language-TypeScript"><span class="hljs-keyword">import</span> { registerLocaleData } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular/common&#x27;</span>;
+
+<span class="hljs-keyword">import</span> localeDe <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular/common/locales/de&#x27;</span>;
+<span class="hljs-keyword">import</span> localeDeAt <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular/common/locales/de-AT&#x27;</span>;
+<span class="hljs-keyword">import</span> localeEs <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;@angular/common/locales/es&#x27;</span>;
+
+registerLocaleData(localeDe);     <span class="hljs-comment">// de-DE</span>
+registerLocaleData(localeDeAt);   <span class="hljs-comment">// de-AT</span>
+registerLocaleData(localeEs);     <span class="hljs-comment">// es-ES</span>
+</code></pre>
+</li>
+</ol>
+  </p>
+  </details>
+<ol start="2">
+<li>
+<p>Add a provider for your default language to the <code>AppModule</code>:</p>
+<pre><code class="language-TypeScript"><span class="hljs-meta">@NgModule</span>({
+    [...],
+    providers: [{ provide: LOCALE_ID, useValue: <span class="hljs-string">&#x27;de&#x27;</span> }],
+    bootstrap: [AppComponent]
+})
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> AppModule {}
+</code></pre>
+</li>
+<li>
+<p>Run your application and find out that the <code>flight-card</code> now displays German dates.</p>
+</li>
+<li>
+<p>Open your <code>flight-card.component.html</code> and modify the call of the <code>date</code> pipe:</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>Date: {{ item.date | date:&#x27;long&#x27;:&#x27;&#x27;:&#x27;es&#x27; }}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+</code></pre>
+</li>
+<li>
+<p>Now the <code>flight-card</code> should display spanish dates.</p>
+</li>
+</ol>
+
+        </article>
+      </section>
+    </main>
+
+    <script src="copy.js"></script>
+    <script src="toggle.js"></script>
+    <script src="copy-diff.js"></script>
+
+  </body>
+</html>
