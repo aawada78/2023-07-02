@@ -25,7 +25,8 @@
       ],
       "@flight-workspace/passenger/feature-search": [
         "libs/passenger/feature-search/src/index.ts"
-      ]
+      ],
+      "@flight-workspace/test": ["libs/test/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
