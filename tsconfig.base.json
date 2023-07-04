@@ -10,23 +10,14 @@
     "importHelpers": true,
     "target": "es2020",
     "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@flight-workspace/flight-lib": [
-        "libs/flight-lib/src/index.ts"
-      ],
-      "@flight-workspace/logger-lib": [
-        "libs/logger-lib/src/index.ts"
-      ],
-      "@flight-workspace/luggage/domain": [
-        "libs/luggage/domain/src/index.ts"
-      ],
+      "@flight-workspace/flight-lib": ["libs/flight-lib/src/index.ts"],
+      "@flight-workspace/logger-lib": ["libs/logger-lib/src/index.ts"],
+      "@flight-workspace/luggage/domain": ["libs/luggage/domain/src/index.ts"],
       "@flight-workspace/luggage/feature-checkin": [
         "libs/luggage/feature-checkin/src/index.ts"
       ],
@@ -42,13 +33,8 @@
       "@flight-workspace/passenger/feature-search": [
         "libs/passenger/feature-search/src/index.ts"
       ],
-      "@flight-workspace/test": [
-        "libs/test/src/index.ts"
-      ]
+      "@flight-workspace/test": ["libs/test/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }
