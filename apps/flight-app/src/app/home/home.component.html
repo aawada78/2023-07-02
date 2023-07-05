@@ -1,6 +1,7 @@
 <div class="card" *transloco="let t">
   <div class="header">
-    <h1 class="title">{{ t('HOME.welcome', { user: userName }) }}</h1>
+    <h1 class="title" *ngIf="!userName">{{ t('HOME.welcome' }}</h1>
+    <h1 class="title" *ngIf="userName">{{ t('HOME.welcome-user', { user: userName }) }}</h1>
   </div>
   <div class="content">
     <div *ngIf="needsLogin$ && needsLogin$ | async" class="alert alert-warning">

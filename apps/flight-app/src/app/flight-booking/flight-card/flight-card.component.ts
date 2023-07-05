@@ -2,6 +2,8 @@
 /* eslint-disable @angular-eslint/no-empty-lifecycle-method */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -12,26 +14,57 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  signal,
 } from '@angular/core';
 import { Flight } from '@flight-workspace/flight-lib';
 
 @Component({
   selector: 'flight-card',
   templateUrl: './flight-card.component.html',
-  // changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FlightCardComponent implements OnInit, OnChanges, OnDestroy {
   @Input() item: Flight | undefined;
   @Input() selected: boolean | undefined;
   @Output() selectedChange = new EventEmitter<boolean>();
 
-  constructor(private element: ElementRef, private zone: NgZone) {}
+  status = signal(0);
 
-  ngOnInit() {}
+  constructor(private element: ElementRef, private zone: NgZone, private cdr: ChangeDetectorRef) { }
 
-  ngOnChanges(changes: SimpleChanges): void {}
+  ngOnInit() {
 
-  ngOnDestroy(): void {}
+    if(this.item?.id !== 27) return;
+
+    setTimeout(() => {
+      this.status.update((status) => status+1);
+      // this.cdr.detectChanges();
+      setTimeout(() => {
+        // this.status++;
+        // this.cdr.detectChanges();
+        this.status.update((status) => status+1);
+        setTimeout(() => {
+          // this.status++;
+          // this.cdr.detectChanges();
+          this.status.update((status) => status+1);
+          setTimeout(() => {
+            // this.status++;
+            // this.cdr.detectChanges();
+            this.status.update((status) => status+1);
+            setTimeout(() => {
+              // this.status++;
+              // this.cdr.detectChanges();
+              this.status.update((status) => status+1);
+            }, 1000);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    }, 1000);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void { }
+
+  ngOnDestroy(): void { }
 
   select() {
     this.selected = true;

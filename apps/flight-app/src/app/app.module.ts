@@ -1,9 +1,9 @@
 import { FlightCancellingModule } from './flight-booking/flight-cancelling/flight-cancelling.module';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { RouterModule } from '@angular/router';
+import { PreloadAllModules, RouterModule } from '@angular/router';
 import { FlightLibModule } from '@flight-workspace/flight-lib';
 
 import { AppComponent } from './app.component';
@@ -19,23 +19,28 @@ import { reducers, metaReducers } from './+state';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment.development';
 import { EffectsModule } from '@ngrx/effects';
+import { CustomPreloadingStrategy } from './custom-preloading.strategy';
+import { OAuthModule } from 'angular-oauth2-oidc';
+import { AuthInterceptor } from './shared/auth/auth.interceptor';
 import { TranslocoRootModule } from './transloco-root.module';
 
 @NgModule({
   imports: [
     BrowserModule,
     HttpClientModule,
-    FlightBookingModule,
+    // FlightBookingModule,
 
     BrowserAnimationsModule,
     FlightCancellingModule,
 
     FlightLibModule.forRoot(),
     SharedModule.forRoot(),
-    RouterModule.forRoot(APP_ROUTES),
+    // RouterModule.forRoot(APP_ROUTES, { preloadingStrategy: PreloadAllModules }),
+    RouterModule.forRoot(APP_ROUTES, { preloadingStrategy: CustomPreloadingStrategy }),
     StoreModule.forRoot(reducers, { metaReducers }),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     EffectsModule.forRoot([]),
+    OAuthModule.forRoot()
     TranslocoRootModule
   ],
   declarations: [
