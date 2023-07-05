@@ -1,5 +1,5 @@
 import { FlightCancellingModule } from './flight-booking/flight-cancelling/flight-cancelling.module';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -20,6 +20,8 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment.development';
 import { EffectsModule } from '@ngrx/effects';
 import { CustomPreloadingStrategy } from './custom-preloading.strategy';
+import { OAuthModule } from 'angular-oauth2-oidc';
+import { AuthInterceptor } from './shared/auth/auth.interceptor';
 
 @NgModule({
   imports: [
@@ -36,7 +38,8 @@ import { CustomPreloadingStrategy } from './custom-preloading.strategy';
     RouterModule.forRoot(APP_ROUTES, { preloadingStrategy: CustomPreloadingStrategy }),
     StoreModule.forRoot(reducers, { metaReducers }),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
-    EffectsModule.forRoot([])
+    EffectsModule.forRoot([]),
+    OAuthModule.forRoot()
   ],
   declarations: [
     AppComponent,

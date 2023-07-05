@@ -1,6 +1,7 @@
 <div class="card">
   <div class="header">
-    <h1 class="title">Welcome {{ userName }}</h1>
+    <h1 class="title" *ngIf="!userName">Welcome! Please Login!</h1>
+    <h1 class="title" *ngIf="userName">Welcome {{ userName }}</h1>
   </div>
   <div class="content">
     <div *ngIf="needsLogin$ && needsLogin$ | async" class="alert alert-warning">
