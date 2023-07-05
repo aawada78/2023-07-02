@@ -1,6 +1,6 @@
-<div class="card">
+<div class="card" *transloco="let t">
   <div class="header">
-    <h1 class="title">Welcome {{ userName }}</h1>
+    <h1 class="title">{{ t('HOME.welcome', { user: userName }) }}</h1>
   </div>
   <div class="content">
     <div *ngIf="needsLogin$ && needsLogin$ | async" class="alert alert-warning">
@@ -8,8 +8,8 @@
       rights for the reqeusted action. Login with a respective user account!
     </div>
 
-    <button (click)="login()" class="btn btn-default">Login</button>
-    <button (click)="logout()" class="btn btn-default">Logout</button>
+    <button (click)="login()" class="btn btn-default">{{ t('HOME.login') }}</button>
+    <button (click)="logout()" class="btn btn-default">{{ t('HOME.logout') }}</button>
   </div>
 </div>
 

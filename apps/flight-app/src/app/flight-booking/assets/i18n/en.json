@@ -1,0 +1,12 @@
+{
+    "FLIGHTS": {
+        "title": "Flight Search",
+        "from": "From",
+        "to": "To",
+        "search": "Search",
+        "urgent": "Urgent",
+        "delay": "Delay 1. Flight",
+        "flightsFound": "{{ count }} flights found!",
+        "flightsFoundMF": "{count, plural, =0 {No flights found} one {# flight found!} other {# flights found!}}"
+    }
+}

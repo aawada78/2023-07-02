@@ -1,0 +1,12 @@
+{
+    "FLIGHTS": {
+        "title": "Flughsuche",
+        "from": "Von",
+        "to": "Nach",
+        "search": "Suchen",
+        "urgent": "Dringend",
+        "delay": "Verspäte 1. Flug",
+        "flightsFound": "{{ count }} Flüge gefunden!",
+        "flightsFoundMF": "{count, plural, =0 {Keine Flüge gefunden} one {# Flug gefunden!} other {# Flüge gefunden!}}"
+    }
+}
