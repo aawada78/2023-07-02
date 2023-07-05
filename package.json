@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nx serve flight-app -o",
     "start:flight-app": "nx serve flight-app -o",
-    "start:passenger": "nx serve passenger --port 4201 -o"
+    "start:passenger": "nx serve passenger --port 4201 -o",
+    "run:all": "node node_modules/@angular-architects/module-federation/src/server/mf-dev-server.js"
   },
   "private": true,
   "dependencies": {
@@ -17,6 +18,8 @@
     "@angular/platform-browser": "~16.0.0",
     "@angular/platform-browser-dynamic": "~16.0.0",
     "@angular/router": "~16.0.0",
+    "@ngneat/transloco": "^4.3.0",
+    "@ngneat/transloco-messageformat": "^4.1.0",
     "@ngrx/component": "^16.0.0",
     "@ngrx/effects": "16.0.0",
     "@ngrx/entity": "^16.0.0",
@@ -62,6 +65,7 @@
     "jest-environment-jsdom": "^29.4.1",
     "jest-preset-angular": "~13.1.0",
     "ng-packagr": "~16.0.0",
+    "ngx-build-plus": "^16.0.0",
     "nx": "16.1.4",
     "nx-cloud": "latest",
     "postcss": "^8.4.5",

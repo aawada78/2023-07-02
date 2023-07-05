@@ -10,13 +10,17 @@
   ],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser",
-      "outputs": ["{options.outputPath}"],
+      "executor": "@nx/angular:webpack-browser",
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/passenger",
         "index": "apps/passenger/src/index.html",
         "main": "apps/passenger/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [
+          "zone.js"
+        ],
         "tsConfig": "apps/passenger/tsconfig.app.json",
         "assets": [
           "apps/passenger/src/favicon.ico",
@@ -29,7 +33,11 @@
           "apps/flight-app/src/assets/css/demo.css",
           "apps/flight-app/src/assets/css/themify-icons.css"
         ],
-        "scripts": []
+        "scripts": [],
+        "customWebpackConfig": {
+          "path": "apps/passenger/webpack.config.js"
+        },
+        "commonChunk": false
       },
       "configurations": {
         "production": {
@@ -45,7 +53,10 @@
               "maximumError": "4kb"
             }
           ],
-          "outputHashing": "all"
+          "outputHashing": "all",
+          "customWebpackConfig": {
+            "path": "apps/passenger/webpack.prod.config.js"
+          }
         },
         "development": {
           "buildOptimizer": false,
@@ -59,7 +70,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@nx/angular:webpack-dev-server",
       "configurations": {
         "production": {
           "browserTarget": "passenger:build:production"
@@ -68,17 +79,24 @@
           "browserTarget": "passenger:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "options": {
+        "port": 4204,
+        "publicHost": "http://localhost:4204"
+      }
     },
     "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "executor": "ngx-build-plus:extract-i18n",
       "options": {
-        "browserTarget": "passenger:build"
+        "browserTarget": "passenger:build",
+        "extraWebpackConfig": "apps/passenger/webpack.config.js"
       }
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "apps/passenger/**/*.ts",
@@ -88,7 +106,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/passenger/jest.config.ts",
         "passWithNoTests": true

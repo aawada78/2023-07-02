@@ -1,4 +1,5 @@
-import {Component} from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { TranslocoService } from '@ngneat/transloco';
 
 @Component({
   selector: 'navbar-cmp',
@@ -8,6 +9,7 @@ import {Component} from '@angular/core';
 export class NavbarComponent {
 
   private sidebarVisible = false;
+  private translocoService = inject(TranslocoService);
 
   sidebarToggle() {
     const body = document.getElementsByTagName('body')[0];
@@ -19,5 +21,9 @@ export class NavbarComponent {
       this.sidebarVisible = false;
       body.classList.remove('nav-open');
     }
+  }
+
+  changeLang(lang: string) {
+    this.translocoService.setActiveLang(lang);
   }
 }
