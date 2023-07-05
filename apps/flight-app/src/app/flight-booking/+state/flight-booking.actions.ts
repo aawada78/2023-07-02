@@ -6,5 +6,6 @@ export const FlightBookingActions = createActionGroup({
   events: {
     'FlightsLoaded': props<{ flights: Flight[] }>(),   
     'LoadFlights': props<{ from: string, to: string, urgent: boolean }>(),   
+    'UpdateFlight': props<{flight: Flight}>()
   }
 });

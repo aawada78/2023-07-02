@@ -9,8 +9,8 @@
       rights for the reqeusted action. Login with a respective user account!
     </div>
 
-    <button (click)="login()" class="btn btn-default">{{ t('HOME.login') }}</button>
-    <button (click)="logout()" class="btn btn-default">{{ t('HOME.logout') }}</button>
+    <button *ngIf="!userName" (click)="login()" class="btn btn-default">{{ t('HOME.login') }}</button>
+    <button *ngIf="userName" (click)="logout()" class="btn btn-default">{{ t('HOME.logout') }}</button>
   </div>
 </div>
 
