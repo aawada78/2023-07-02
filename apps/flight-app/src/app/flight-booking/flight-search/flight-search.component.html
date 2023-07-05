@@ -1,42 +1,43 @@
-<div class="card">
+<div class="card" *transloco="let t, scope: 'flightbooking', read: 'flightbooking.FLIGHTS'">
 
   <div class="header">
-    <h2 class="title">Flight Search</h2>
+    <h2 class="title">{{ t('title') }}</h2>
   </div>
   <div class="content">
 
     <form>
 
       <div class="form-group">
-        <label>From:</label>
+        <label>{{ t('from') }}:</label>
         <input [(ngModel)]="from" name="from" class="form-control">
       </div>
       <div class="form-group">
-        <label>To:</label>
+        <label>{{ t('to') }}:</label>
         <input [(ngModel)]="to" name="to" class="form-control">
       </div>
       <div class="form-group">
         <label>
           <input [(ngModel)]="urgent" name="urgent" type="checkbox">
-          Urgent (When it's urgent it fails -- like in real life ;-))
+          {{ t('urgent') }} (When it's urgent it fails -- like in real life ;-))
 
         </label>
       </div>
 
       <div class="form-group">
-        <button (click)="search()" [disabled]="!from || !to"
-          class="btn btn-default">
-          Search
+        <button (click)="search()" [disabled]="!from || !to" class="btn btn-default">
+          {{ t('search') }}
         </button>
 
         <ng-container *ngIf="flights$ | async let flights">
-          <button *ngIf="flights.length > 0" class="btn btn-default"
-            (click)="delay()">
-            Delay 1st Flight
+          <button *ngIf="flights.length > 0" class="btn btn-default" (click)="delay()">
+            {{ t('delay') }}
           </button>
-          
-          <div *ngIf="flights.length > 0">
-            {{flights.length}} flights found!
+
+          <!-- <div *ngIf="flights.length > 0">
+            {{ t('flightsFoundMF', { count: flights.length }) }}
+          </div> -->
+          <div>
+            {{ t('flightsFoundMF', { count: flights.length }) }}
           </div>
         </ng-container>
 
@@ -50,9 +51,7 @@
   <div *ngFor="let f of flights$ | async">
 
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-      <flight-card
-        [item]="f"
-        [(selected)]="basket[f.id]">
+      <flight-card [item]="f" [(selected)]="basket[f.id]">
       </flight-card>
     </div>
   </div>

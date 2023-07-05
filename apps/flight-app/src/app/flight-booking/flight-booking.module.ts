@@ -13,6 +13,14 @@ import { StoreModule } from '@ngrx/store';
 import * as fromFlightBooking from './+state/flight-booking.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { FlightBookingEffects } from './+state/flight-booking.effects';
+import { TRANSLOCO_SCOPE, TranslocoModule } from '@ngneat/transloco';
+import { TranslocoMessageFormatModule } from '@ngneat/transloco-messageformat';
+
+
+export const loader = ['de', 'en'].reduce((acc: any, lang) => {
+  acc[lang] = () => import(`./assets/i18n/${lang}.json`);
+  return acc;
+}, {});
 
 @NgModule({
   imports: [
@@ -22,6 +30,8 @@ import { FlightBookingEffects } from './+state/flight-booking.effects';
     RouterModule.forChild(FLIGHT_BOOKING_ROUTES),
     StoreModule.forFeature(fromFlightBooking.flightBookingFeatureKey, fromFlightBooking.reducer),
     EffectsModule.forFeature([FlightBookingEffects]),
+    TranslocoModule,
+    TranslocoMessageFormatModule
   ],
   declarations: [
     FlightSearchComponent,
@@ -30,7 +40,15 @@ import { FlightBookingEffects } from './+state/flight-booking.effects';
     FlightEditComponent,
     FlightBookingComponent,
   ],
-  providers: [],
+  providers: [
+    {
+      provide: TRANSLOCO_SCOPE,
+      useValue: {
+        scope: 'flightbooking',
+        loader
+      }
+    }
+  ],
   exports: [FlightSearchComponent],
 })
 export class FlightBookingModule {}

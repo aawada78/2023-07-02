@@ -1,0 +1,8 @@
+{
+    "HOME": {
+        "welcome": "Welcome! Please Login!",
+        "welcome-user": "Welcome {{ user }}!",
+        "login": "Login",
+        "logout": "Logout"
+    }
+}

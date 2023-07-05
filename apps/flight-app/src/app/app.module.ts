@@ -22,6 +22,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { CustomPreloadingStrategy } from './custom-preloading.strategy';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthInterceptor } from './shared/auth/auth.interceptor';
+import { TranslocoRootModule } from './transloco-root.module';
 
 @NgModule({
   imports: [
@@ -40,6 +41,7 @@ import { AuthInterceptor } from './shared/auth/auth.interceptor';
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     EffectsModule.forRoot([]),
     OAuthModule.forRoot()
+    TranslocoRootModule
   ],
   declarations: [
     AppComponent,
